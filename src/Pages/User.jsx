@@ -1,15 +1,18 @@
 import { FaCodepen, FaStore, FaUserFriends, FaUsers } from "react-icons/fa"
 import { useEffect, useContext } from "react"
+
 import { Link, useParams } from "react-router-dom"
 import GithubContext from "../context/github/GithubContext"
 import Spinner from "../components/layout/Spinner"
+import RepoList from "../components/repos/RepoList"
 
 const User = () => {
     const params = useParams()
 
-    const { getUser, user, loading } = useContext(GithubContext)
+    const { getUser, user, loading , getUserRepos, repos } = useContext(GithubContext)
     useEffect(() => {
         getUser(params.login)
+        getUserRepos(params.login)
     }, [params.login])
 
     const {
@@ -148,6 +151,7 @@ const User = () => {
                 </div>
             </div>
         </div>
+        <RepoList repos={repos} />
         </div>
     </>
   )

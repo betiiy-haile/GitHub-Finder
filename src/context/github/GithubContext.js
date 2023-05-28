@@ -1,15 +1,19 @@
 import { createContext , useReducer } from "react";
+// import axios from "axios";
 import githubReducer from "./GithubReducer";
 
 const GithubContext = createContext()
 
 const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN
 const GITHUB_URL = process.env.REACT_APP_GITHUB_URL
+const GITHUB_CLIENTID = process.env.REACT_APP_CLIENT_ID
+const GITHUB_CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET_KEY;
 
 export const GithubProvider = ({children}) => {
     const initialState = {
         users: [],
         user: {},
+        userRepos: {},
         loading: false
     }
 
@@ -55,7 +59,7 @@ export const GithubProvider = ({children}) => {
       }else{
         const data = await response.json();
 
-        console.log(data);
+        // console.log(data);
         dispatch({
           type: "GET_USER",
           payload: data,
@@ -63,15 +67,40 @@ export const GithubProvider = ({children}) => {
       }      
     }; 
 
+    const getUserRepos = async (username) => {
+      setLoading();
+      const url = `https://api.github.com/users/${username}/repos?per_page=10&sort=created:asc`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (response.status === 404) {
+        window.location = "/notfound";
+      } else {
+        const data = await response.json();
+        // console.log(data);
+        dispatch({
+          type: "GET_REPOS",
+          payload: data,
+        });
+      }
+    };
+
     const clearUsers = () => dispatch({ type: 'CLEAR_USERS'})
 
     const value = {
         users: state.users,
         user: state.user,
+        repos: state.repos,
         loading: state.loading,
         searchUsers,
         clearUsers, 
-        getUser
+        getUser,
+        getUserRepos,
     }
 
     const setLoading = () => {
